@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KahanGaya? | Money Scoreboard</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#38bdf8">
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --card-bg: #1e293b;
+            --accent-primary: #38bdf8;
+            --accent-success: #4ade80;
+            --accent-warning: #fbbf24;
+            --accent-danger: #f87171;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            width: 100%;
+            max-width: 600px;
+            padding: 2rem 1rem;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--accent-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .tagline {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-style: italic;
+        }
+
+        .dashboard {
+            width: 100%;
+            max-width: 600px;
+            padding: 0 1rem 4rem 1rem;
+            box-sizing: border-box;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            background: var(--card-bg);
+            padding: 0.4rem;
+            border-radius: 1rem;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 0.6rem;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 0.7rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            color: var(--text-muted);
+        }
+
+        .nav-tab.active {
+            background: var(--accent-primary);
+            color: var(--bg-dark);
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .scoreboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 1.2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .card-full {
+            grid-column: span 2;
+            text-align: center;
+            border: 2px solid var(--accent-primary);
+        }
+
+        .label {
+            display: block;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .unit {
+            font-size: 1rem;
+            color: var(--text-muted);
+            margin-left: 4px;
+        }
+
+        .xray-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .xray-category {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .xray-info h4 {
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        .xray-info p {
+            margin: 0;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .status-pill {
+            padding: 0.3rem 0.7rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .pill-healthy { background: rgba(74, 222, 128, 0.2); color: var(--accent-success); }
+        .pill-warning { background: rgba(251, 191, 36, 0.2); color: var(--accent-warning); }
+        .pill-danger { background: rgba(248, 113, 113, 0.2); color: var(--accent-danger); }
+
+        .section-title {
+            font-size: 1.2rem;
+            margin: 2rem 0 1rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .rec-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .rec-card {
+            background: var(--card-bg);
+            padding: 1rem;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: transform 0.2s;
+            cursor: pointer;
+            border-left: 4px solid var(--accent-primary);
+        }
+
+        .rec-card:hover {
+            transform: translateX(5px);
+        }
+
+        .rec-icon {
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--accent-primary);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .rec-content {
+            flex: 1;
+        }
+
+        .rec-action {
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .rec-reason {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .persona-bar {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: #1e293b;
+            padding: 1rem;
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            box-sizing: border-box;
+        }
+
+        .persona-btn {
+            background: #334155;
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .persona-btn.active {
+            background: var(--accent-primary);
+            color: var(--bg-dark);
+            font-weight: bold;
+        }
+
+        .ai-bubble {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: var(--accent-primary);
+            color: var(--bg-dark);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+            z-index: 100;
+        }
+
+        .ai-bubble:hover {
+            transform: scale(1.1);
+        }
+
+        .chat-window {
+            position: fixed;
+            bottom: 150px;
+            right: 20px;
+            width: 320px;
+            max-height: 450px;
+            background: var(--card-bg);
+            border-radius: 1.2rem;
+            display: none;
+            flex-direction: column;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+            z-index: 101;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            padding: 1rem;
+            background: var(--accent-primary);
+            color: var(--bg-dark);
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            max-height: 300px;
+        }
+
+        .msg {
+            padding: 0.6rem 0.8rem;
+            border-radius: 0.8rem;
+            font-size: 0.9rem;
+            max-width: 85%;
+        }
+
+        .msg-user {
+            background: var(--accent-primary);
+            color: var(--bg-dark);
+            align-self: flex-end;
+        }
+
+        .msg-ai {
+            background: #334155;
+            color: white;
+            align-self: flex-start;
+        }
+
+        .chat-input {
+            padding: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 0.5rem;
+            border-radius: 0.4rem;
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: white;
+        }
+
+        .chat-input button {
+            background: var(--accent-primary);
+            border: none;
+            color: var(--bg-dark);
+            padding: 0.5rem 0.8rem;
+            border-radius: 0.4rem;
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">KahanGaya?</div>
+        <div class="tagline">"Paisa kahan gaya? KahanGaya? knows."</div>
+    </header>
+
+    <div class="dashboard">
+        <div class="nav-tabs">
+            <div class="nav-tab active" onclick="showPage('today')">Today</div>
+            <div class="nav-tab" onclick="showPage('xray')">Financial X-Ray</div>
+            <div class="nav-tab" onclick="showPage('goals')">Goals</div>
+            <div class="nav-tab" onclick="showPage('profile')">Profile</div>
+            <div class="nav-tab" onclick="showPage('tx')">Wallet</div>
+        </div>
+
+        <div id="today" class="page active">
+            <div class="scoreboard">
+                <div class="card card-full">
+                    <span class="label">Safe to Spend Today</span>
+                    <div class="value" id="safe-to-spend">₹0<span class="unit"></span></div>
+                </div>
+                <div class="card">
+                    <span class="label">Emergency Runway</span>
+                    <div class="value" id="runway">0<span class="unit">days</span></div>
+                </div>
+                <div class="card">
+                    <span class="label">Health Score</span>
+                    <div class="value" id="health-score">--</div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-bottom: 2rem; background: linear-gradient(135deg, #1e293b 0%, #334155 100%); border: 1px solid var(--accent-primary); text-align: center; cursor: pointer;" onclick="triggerSurprise()">
+                <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🎁</div>
+                <div style="font-weight: bold; color: var(--accent-primary);">Surprise Me!</div>
+                <div id="surprise-text" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem; padding: 0 1rem;">
+                    Click to find a hidden pattern in your spending...
+                </div>
+            </div>
+
+            <div class="section-title">🧪 What-If Simulator</div>
+            <div class="card" style="margin-bottom: 2rem; border: 1px dashed var(--accent-primary);">
+                <span class="label">Simulate a Change</span>
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                    <input type="number" id="sim-value" placeholder="Amount (₹)" style="flex: 1; padding: 0.6rem; border-radius: 0.5rem; border: 1px solid #334155; background: #0f172a; color: white;">
+                    <select id="sim-type" style="flex: 1; padding: 0.6rem; border-radius: 0.5rem; border: 1px solid #334155; background: #0f172a; color: white;">
+                        <option value="balance">Add to Balance</option>
+                        <option value="expense">Add Expense</option>
+                        <option value="burn">Reduce Monthly Burn</option>
+                    </select>
+                    <button onclick="runSimulation()" style="background: var(--accent-primary); color: var(--bg-dark); border: none; padding: 0.6rem 1rem; border-radius: 0.5rem; font-weight: bold; cursor: pointer;">Run</button>
+                </div>
+                <div id="sim-result" style="font-size: 0.9rem; color: var(--text-muted); text-align: center; min-height: 1.2rem;">
+                    Enter a value to see the ripple effect...
+                </div>
+            </div>
+
+            <div class="section-title">🚀 Next Best Move</div>
+            <div class="rec-list" id="rec-list">
+                <!-- Recommendations populated by JS -->
+            </div>
+        </div>
+
+        <div id="xray" class="page">
+            <div class="section-title">🩺 Financial X-Ray Scan</div>
+            <div class="card">
+                <div class="xray-grid" id="xray-grid">
+                    <!-- X-Ray items populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <div id="profile" class="page">
+            <div class="section-title">👤 User Profile</div>
+            <div class="card">
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div>
+                        <label class="label">Initial Balance (₹)</label>
+                        <input type="number" id="prof-balance" style="width: 100%; padding: 0.6rem; border-radius: 0.5rem; border: 1px solid #334155; background: #0f172a; color: white;">
+                    </div>
+                    <div>
+                        <label class="label">Essential Monthly Burn (₹)</label>
+                        <input type="number" id="prof-burn" style="width: 100%; padding: 0.6rem; border-radius: 0.5rem; border: 1px solid #334155; background: #0f172a; color: white;">
+                    </div>
+                    <div>
+                        <label class="label">Required Reserve (₹)</label>
+                        <input type="number" id="prof-reserve" style="width: 100%; padding: 0.6rem; border-radius: 0.5rem; border: 1px solid #334155; background: #0f172a; color: white;">
+                    </div>
+                    <button onclick="saveProfile()" style="background: var(--accent-primary); color: var(--bg-dark); border: none; padding: 0.8rem; border-radius: 0.5rem; font-weight: bold; cursor: pointer;">Save Profile</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="tx" class="page">
+            <div class="section-title">👛 Wallet</div>
+            <div class="card" style="margin-bottom: 1rem;">
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                    <input type="number" id="tx-amount" placeholder="Amount (₹)" style="flex: 1; padding: 0.6rem; border-radius: 0.5rem; border: 1px solid #334155; background: #0f172a; color: white;">
+                    <select id="tx-type" style="flex: 1; padding: 0.6rem; border-radius: 0.5rem; border: 1px solid #334155; background: #0f172a; color: white;">
+                        <option value="expense">Expense</option>
+                        <option value="income">Income</option>
+                    </select>
+                    <button onclick="addTransaction()" style="background: var(--accent-primary); color: var(--bg-dark); border: none; padding: 0.6rem 1rem; border-radius: 0.5rem; font-weight: bold; cursor: pointer;">Add</button>
+                </div>
+            </div>
+            <div class="card">
+                <div id="tx-list" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <!-- Transactions go here -->
+                </div>
+            </div>
+        </div>
+
+        <div id="goals" class="page">
+            <div class="section-title">🎯 My Goals</div>
+            <div class="card" style="margin-bottom: 1rem;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <input type="text" id="goal-name" placeholder="Goal Name (e.g. New Laptop)" style="padding: 0.6rem; border-radius: 0.5rem; border: 1px solid #334155; background: #0f172a; color: white;">
+                    <input type="number" id="goal-target" placeholder="Target Amount (₹)" style="padding: 0.6rem; border-radius: 0.5rem; border: 1px solid #334155; background: #0f172a; color: white;">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 1rem;">
+                    <input type="number" id="goal-monthly" placeholder="Monthly Contribution (₹)" style="padding: 0.6rem; border-radius: 0.5rem; border: 1px solid #334155; background: #0f172a; color: white;">
+                    <input type="date" id="goal-deadline" style="padding: 0.6rem; border-radius: 0.5rem; border: 1px solid #334155; background: #0f172a; color: white;">
+                </div>
+                <button onclick="saveGoal()" style="width: 100%; background: var(--accent-primary); color: var(--bg-dark); border: none; padding: 0.8rem; border-radius: 0.5rem; font-weight: bold; cursor: pointer;">Create Goal</button>
+            </div>
+            <div id="goals-list" style="display: flex; flex-direction: column; gap: 1rem;">
+                <!-- Goals populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <div class="ai-bubble" onclick="toggleChat()">💬</div>
+    <div class="chat-window" id="chat-window">
+        <div class="chat-header">
+            <span>Ask KahanGaya?</span>
+            <span style="cursor: pointer;" onclick="toggleChat()">✕</span>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+            <div class="msg msg-ai">Hi! I'm KahanGaya. Ask me anything about your money!</div>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="chat-input" placeholder="How much can I spend?">
+            <button onclick="sendChatMessage()">Send</button>
+        </div>
+    </div>
+
+    <div class="persona-bar">
+        <button class="persona-btn active" onclick="loadPersona('student')">Student</button>
+        <button class="persona-btn" onclick="loadPersona('youngProf')">Young Prof</button>
+        <button class="persona-btn" onclick="loadPersona('highEarner')">High Earner</button>
+        <button class="persona-btn" onclick="loadPersona('debtHeavy')">Debt Heavy</button>
+        <button class="persona-btn" onclick="loadPersona('aggressiveSaver')">Saver</button>
+    </div>
+
+    <script type="module">
+        import { FinancialBrain } from './src/brain.js';
+        import { MemoryStore } from './src/memoryStore.js';
+        import { DiscoveryEngine } from './src/discoveryEngine.js';
+        import { AILayer } from './src/aiLayer.js';
+
+        let currentPersonaKey = 'student';
+        const personaData = {
+            student: {
+                state: { balance: 5000, commitments: [{amount: 2000}], expectedVariableSpend: 1000, requiredReserve: 500, essentialMonthlyBurn: 3000 },
+                recs: [
+                    { action: "Cut Cab Spend", reason: "High leakage detected in transport", impact: 3, urgency: 3, confidence: 0.7, relevance: 1, goalAlignment: 0.5, effort: 4 },
+                    { action: "Save ₹500", reason: "Buffer is below target", impact: 2, urgency: 1, confidence: 0.9, relevance: 0.8, goalAlignment: 1, effort: 2 }
+                ],
+                xray: [
+                    { cat: "Liquidity", label: "Cash Position", desc: "Low buffer for a student", status: "warning" },
+                    { cat: "Safety", label: "Emergency Runway", desc: "Below 30-day threshold", status: "danger" },
+                    { cat: "Behavior", label: "Transport Leak", desc: "Spending on cabs is high", status: "warning" },
+                    { cat: "Goals", label: "Savings Goal", desc: "On track but slow", status: "healthy" }
+                ]
+            },
+            youngProf: {
+                state: { balance: 45000, commitments: [{amount: 15000}], expectedVariableSpend: 8000, requiredReserve: 10000, essentialMonthlyBurn: 20000 },
+                recs: [
+                    { action: "Start SIP", reason: "Excess idle cash detected", impact: 4, urgency: 2, confidence: 0.9, relevance: 1, goalAlignment: 1, effort: 2 },
+                    { action: "Review Subscriptions", reason: "3 overlapping streaming apps", impact: 2, urgency: 2, confidence: 0.8, relevance: 0.9, goalAlignment: 0.6, effort: 1 }
+                ],
+                xray: [
+                    { cat: "Liquidity", label: "Cash Position", desc: "Healthy monthly surplus", status: "healthy" },
+                    { cat: "Safety", label: "Emergency Runway", desc: "Stable at ~60 days", status: "healthy" },
+                    { cat: "Behavior", label: "Subscription Leak", desc: "Redundant streaming apps", status: "warning" },
+                    { cat: "Opportunities", label: "Idle Cash", desc: "Money not working for you", status: "warning" }
+                ]
+            },
+            highEarner: {
+                state: { balance: 500000, commitments: [{amount: 40000}], expectedVariableSpend: 20000, requiredReserve: 100000, essentialMonthlyBurn: 60000 },
+                recs: [
+                    { action: "Tax Planning", reason: "Eligible for higher deductions", impact: 5, urgency: 3, confidence: 0.9, relevance: 1, goalAlignment: 1, effort: 3 },
+                    { action: "Diversify Portfolio", reason: "Over-exposure to equity", impact: 4, urgency: 1, confidence: 0.8, relevance: 1, goalAlignment: 0.9, effort: 2 }
+                ],
+                xray: [
+                    { cat: "Liquidity", label: "Cash Position", desc: "Very strong liquidity", status: "healthy" },
+                    { cat: "Safety", label: "Emergency Runway", desc: "Over 200 days", status: "healthy" },
+                    { cat: "Risk", label: "Portfolio Concentration", desc: "Too much in one sector", status: "warning" },
+                    { cat: "Compliance", label: "Tax Optimization", desc: "Potential for 80C gaps", status: "warning" }
+                ]
+            },
+            debtHeavy: {
+                state: { balance: 12000, commitments: [{amount: 8000}], expectedVariableSpend: 3000, requiredReserve: 1000, essentialMonthlyBurn: 10000 },
+                recs: [
+                    { action: "Debt Snowball", reason: "Highest interest loan is priority", impact: 5, urgency: 5, confidence: 0.9, relevance: 1, goalAlignment: 1, effort: 4 },
+                    { action: "Avoid Credit", reason: "Runway is dangerously low", impact: 3, urgency: 5, confidence: 0.9, relevance: 1, goalAlignment: 1, effort: 1 }
+                ],
+                xray: [
+                    { cat: "Liquidity", label: "Cash Position", desc: "Dangerously tight", status: "danger" },
+                    { cat: "Safety", label: "Emergency Runway", desc: "Critical: < 30 days", status: "danger" },
+                    { cat: "Obligations", label: "Debt Load", desc: "High DTI ratio", status: "danger" },
+                    { cat: "Risk", label: "Credit Dependency", desc: "High risk of new debt", status: "danger" }
+                ]
+            },
+            aggressiveSaver: {
+                state: { balance: 120000, commitments: [{amount: 10000}], expectedVariableSpend: 5000, requiredReserve: 50000, essentialMonthlyBurn: 15000 },
+                recs: [
+                    { action: "Increase Goal Contribution", reason: "On track to hit goal early", impact: 3, urgency: 1, confidence: 0.9, relevance: 1, goalAlignment: 1, effort: 1 },
+                    { action: "Treat Yourself", reason: "Saving rate is > 70%, consider burnout", impact: 1, urgency: 1, confidence: 0.6, relevance: 0.7, goalAlignment: 0.3, effort: 1 }
+                ],
+                xray: [
+                    { cat: "Liquidity", label: "Cash Position", desc: "Extremely strong", status: "healthy" },
+                    { cat: "Safety", label: "Emergency Runway", desc: "Very secure", status: "healthy" },
+                    { cat: "Psychology", label: "Saving Rate", desc: "Aggressive (might be too high)", status: "warning" },
+                    { cat: "Goals", label: "Progress", desc: "Accelerating ahead of schedule", status: "healthy" }
+                ]
+            }
+        };
+
+        window.showPage = (pageId) => {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            
+            const page = document.getElementById(pageId);
+            if (page) page.classList.add('active');
+            
+            const tab = document.querySelector(`[onclick="showPage('${pageId}')"]`);
+            if (tab) tab.classList.add('active');
+        };
+
+        window.loadPersona = (key) => {
+            currentPersonaKey = key;
+            const p = personaData[key];
+            if (!p) return;
+            const state = p.state;
+
+            const safe = FinancialBrain.calculateSafeToSpend(state);
+            const runway = FinancialBrain.calculateEmergencyRunway(state);
+            const ranked = FinancialBrain.rankRecommendations(p.recs, state);
+
+            document.getElementById('safe-to-spend').innerHTML = `₹${safe}<span class="unit"></span>`;
+            document.getElementById('runway').innerHTML = `${runway}<span class="unit">days</span>`;
+
+            const health = runway > 90 ? 'Excellent' : runway > 30 ? 'Stable' : 'At Risk';
+            document.getElementById('health-score').innerText = health;
+            document.getElementById('health-score').style.color =
+                health === 'Excellent' ? 'var(--accent-success)' :
+                health === 'Stable' ? 'var(--accent-warning)' : 'var(--accent-danger)';
+
+            const recContainer = document.getElementById('rec-list');
+            recContainer.innerHTML = '';
+
+            ranked.forEach((rec, index) => {
+                const div = document.createElement('div');
+                div.className = 'rec-card';
+                div.innerHTML = `
+                    <div class="rec-icon">${index + 1}</div>
+                    <div class="rec-content">
+                        <div class="rec-action">${rec.action}</div>
+                        <div class="rec-reason">${rec.reason}</div>
+                    </div>
+                `;
+                recContainer.appendChild(div);
+            });
+
+            const xrayContainer = document.getElementById('xray-grid');
+            xrayContainer.innerHTML = '';
+            if (p.xray) {
+                p.xray.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'xray-category';
+                    div.innerHTML = `
+                        <div class="xray-info">
+                            <h4>${item.label} <span style="color: var(--text-muted); font-weight: normal; font-size: 0.7rem;">(${item.cat})</span></h4>
+                            <p>${item.desc}</p>
+                        </div>
+                        <div class="status-pill pill-${item.status}">${item.status}</div>
+                    `;
+                    xrayContainer.appendChild(div);
+                });
+            }
+
+            document.querySelectorAll('.persona-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.innerText.toLowerCase().includes(key.toLowerCase().replace('youngprof', 'young prof').replace('debtheavy', 'debt heavy').replace('aggregivesaver', 'saver')));
+            });
+        };
+
+        window.runSimulation = () => {
+            const value = parseFloat(document.getElementById('sim-value').value);
+            const type = document.getElementById('sim-type').value;
+            if (isNaN(value)) {
+                document.getElementById('sim-result').innerText = "Please enter a valid number.";
+                return;
+            }
+            const currentState = currentPersonaKey 
+                ? personaData[currentPersonaKey].state 
+                : MemoryStore.computeCurrentState();
+
+            if (!currentState) {
+                document.getElementById('sim-result').innerText = "Please set up your profile first!";
+                return;
+            }
+
+            let modifications = {};
+            if (type === 'balance') modifications.balance = currentState.balance + value;
+            if (type === 'expense') modifications.balance = currentState.balance - value;
+            if (type === 'burn') modifications.essentialMonthlyBurn = Math.max(0, currentState.essentialMonthlyBurn - value);
+
+            const result = FinancialBrain.simulateScenario(currentState, modifications);
+            const { safeToSpendDelta, runwayDelta } = result.diffs;
+            const safeText = safeToSpendDelta >= 0 ? `+₹${safeToSpendDelta}` : `-₹${Math.abs(safeToSpendDelta)}`;
+            const runwayText = runwayDelta >= 0 ? `+${runwayDelta} days` : `${runwayDelta} days`;
+
+            document.getElementById('sim-result').innerHTML = 
+                `Ripple Effect: <span style="color: var(--accent-primary)">${safeText}</span> Safe-to-Spend, <span style="color: var(--accent-primary)">${runwayText}</span> Runway.`;
+        };
+
+        window.saveProfile = () => {
+            const profile = {
+                initialBalance: parseFloat(document.getElementById('prof-balance').value) || 0,
+                essentialMonthlyBurn: parseFloat(document.getElementById('prof-burn').value) || 0,
+                requiredReserve: parseFloat(document.getElementById('prof-reserve').value) || 0,
+                commitments: []
+            };
+            MemoryStore.saveProfile(profile);
+            alert("Profile Saved!");
+            updateDashboardFromStore();
+        };
+
+        window.addTransaction = () => {
+            const amount = parseFloat(document.getElementById('tx-amount').value);
+            const type = document.getElementById('tx-type').value;
+            if (isNaN(amount)) return;
+            MemoryStore.saveTransaction({ amount, type, isFixed: false });
+            document.getElementById('tx-amount').value = '';
+            updateTxList();
+            updateDashboardFromStore();
+        };
+
+        window.updateTxList = () => {
+            const txs = MemoryStore.getTransactions();
+            const list = document.getElementById('tx-list');
+            list.innerHTML = txs.slice().reverse().map(tx => `
+                <div style="display: flex; justify-content: space-between; padding: 0.5rem; background: #0f172a; border-radius: 0.4rem; font-size: 0.8rem;">
+                    <span>${tx.type === 'income' ? '🟢' : '🔴'} ${tx.type}</span>
+                    <span style="font-weight: bold;">₹${tx.amount}</span>
+                </div>
+            `).join('');
+        };
+
+        window.saveGoal = () => {
+            const name = document.getElementById('goal-name').value;
+            const target = parseFloat(document.getElementById('goal-target').value);
+            const monthly = parseFloat(document.getElementById('goal-monthly').value);
+            const deadline = document.getElementById('goal-deadline').value;
+            if (!name || isNaN(target)) return alert("Please enter goal name and target.");
+            MemoryStore.saveGoal({ name, target, monthly: monthly || 0, deadline, saved: 0 });
+            document.getElementById('goal-name').value = '';
+            document.getElementById('goal-target').value = '';
+            document.getElementById('goal-monthly').value = '';
+            document.getElementById('goal-deadline').value = '';
+            updateGoalsList();
+        };
+
+        window.updateGoalsList = () => {
+            const goals = MemoryStore.getGoals();
+            const list = document.getElementById('goals-list');
+            list.innerHTML = goals.map(g => {
+                const progress = (g.saved / g.target) * 100;
+                return `
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                            <span style="font-weight: bold;">${g.name}</span>
+                            <span style="font-size: 0.8rem; color: var(--text-muted);">₹${g.saved} / ₹${g.target}</span>
+                        </div>
+                        <div style="width: 100%; background: #0f172a; height: 10px; border-radius: 5px; overflow: hidden; margin-bottom: 1rem;">
+                            <div style="width: ${Math.min(100, progress)}%; background: var(--accent-primary); height: 100%;"></div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">Monthly: ₹${g.monthly}</span>
+                            <button onclick="deleteGoal(${g.id})" style="background: none; border: none; color: var(--accent-danger); cursor: pointer; font-size: 0.75rem;">Delete</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        };
+
+        window.deleteGoal = (id) => {
+            MemoryStore.deleteGoal(id);
+            updateGoalsList();
+        };
+
+        window.updateDashboardFromStore = () => {
+            const state = MemoryStore.computeCurrentState();
+            if (!state) return;
+            const safe = FinancialBrain.calculateSafeToSpend(state);
+            const runway = FinancialBrain.calculateEmergencyRunway(state);
+            document.getElementById('safe-to-spend').innerHTML = `₹${safe}<span class="unit"></span>`;
+            document.getElementById('runway').innerHTML = `${runway}<span class="unit">days</span>`;
+            const health = runway > 90 ? 'Excellent' : runway > 30 ? 'Stable' : 'At Risk';
+            document.getElementById('health-score').innerText = health;
+            document.getElementById('health-score').style.color = 
+                health === 'Excellent' ? 'var(--accent-success)' : 
+                health === 'Stable' ? 'var(--accent-warning)' : 'var(--accent-danger)';
+            document.getElementById('rec-list').innerHTML = '<div style="color: var(--text-muted); text-align: center; font-size: 0.8rem;">Personalized recommendations coming soon...</div>';
+            document.querySelectorAll('.persona-btn').forEach(btn => btn.classList.remove('active'));
+            currentPersonaKey = null;
+        };
+
+        window.toggleChat = () => {
+            const win = document.getElementById('chat-window');
+            win.style.display = win.style.display === 'flex' ? 'none' : 'flex';
+        };
+
+        window.sendChatMessage = async () => {
+            const input = document.getElementById('chat-input');
+            const msg = input.value.trim();
+            if (!msg) return;
+            const container = document.getElementById('chat-messages');
+            container.innerHTML += `<div class="msg msg-user">${msg}</div>`;
+            input.value = '';
+            container.scrollTop = container.scrollHeight;
+            const aiMsgDiv = document.createElement('div');
+            aiMsgDiv.className = 'msg msg-ai';
+            aiMsgDiv.innerText = '...';
+            container.appendChild(aiMsgDiv);
+            try {
+                const response = await AILayer.ask(msg);
+                aiMsgDiv.innerText = response;
+            } catch (e) {
+                aiMsgDiv.innerText = "Sorry, I'm having trouble connecting to my brain.";
+            }
+            container.scrollTop = container.scrollHeight;
+        };
+
+        window.triggerSurprise = () => {
+            const surprise = DiscoveryEngine.getRandomSurprise();
+            const textElement = document.getElementById('surprise-text');
+            textElement.style.color = 'var(--text-main)';
+            textElement.innerHTML = `<strong>${surprise.title}:</strong> ${surprise.message}`;
+            const card = textElement.parentElement;
+            card.style.transform = 'scale(1.02)';
+            setTimeout(() => card.style.transform = 'scale(1)', 100);
+        };
+
+        window.onload = () => {
+            loadPersona('student');
+            updateTxList();
+            updateGoalsList();
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('SW Registered!'))
+                    .catch(err => console.log('SW Registration failed:', err));
+            }
+        };
+    </script>
+</body>
+</html>
